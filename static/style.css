@@ -5,17 +5,3 @@ body {
 #content {
      margin-left: 20px;
 }
-
-table.posts {
-    width: 100%;
-}
-
-table.posts td, th {
-    border: 1px solid black;
-    text-align: left;
-    padding: 8px;
-}
-
-table.posts tr:nth-child(even) {
-    background-color: #dddddd;
-}
