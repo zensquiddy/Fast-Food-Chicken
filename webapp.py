@@ -26,11 +26,9 @@ github = oauth.remote_app(
     authorize_url='https://github.com/login/oauth/authorize' #URL for github's OAuth login
 )
 
-posts_file = "posts.json" #use a JSON file to store the past posts.  A global list variable doesn't work when handling multiple requests coming in and being handled on different threads
+#use a JSON file to store the past posts.  A global list variable doesn't work when handling multiple requests coming in and being handled on different threads
+#Create and set a global variable for the name of you JSON file here.  The file will be created on Heroku, so you don't need to make it in GitHub
 
-#context processors run before templates are rendered and add variable(s) to the template's context
-#context processors must return a dictionary 
-#this context processor adds the variable logged_in to the conext for all templates
 @app.context_processor
 def inject_logged_in():
     return {"logged_in":('github_token' in session)}
@@ -41,30 +39,8 @@ def home():
 
 @app.route('/posted', methods=['POST'])
 def post():
-    text = request.form['message']
-    with open(posts_file, 'r+') as f:
-        posts = json.load(f)
-        posts.append([session['user_data']['login'],text]) #add [username,message] to the list of posts
-        f.seek(0) #move to the beginning of the file
-        f.truncate() #clear the file before writing to it
-        json.dump(posts, f)
-    return render_template('home.html', past_posts=posts_to_html())
-
-def posts_to_html():
-    try:
-        print(os.path.abspath(posts_file))
-        with open(posts_file, 'r') as f:
-            posts = json.load(f)
-            posts_code = Markup('<table class="posts"><tr><th>User</th><th>Message</th></tr>')
-            for p in reversed(posts): #put most recent posts at the top
-                user = p[0]
-                message = p[1]
-                posts_code += Markup("<tr><td>" + user + "</td><td>" + message + "</td></tr>")
-            posts_code += Markup('</table>')
-    except Exception as inst:
-        print(inst)
-        posts_code=""
-    return posts_code
+    #This function should add the new post to the JSON file of posts and then render home.html and display the posts.  
+    #Every post should include the username of the poster and text of the post. 
 
 #redirect to GitHub's OAuth page and confirm callback URL
 @app.route('/login')
