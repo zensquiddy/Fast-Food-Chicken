@@ -3,8 +3,11 @@ from flask_oauthlib.client import OAuth
 #from flask_oauthlib.contrib.apps import github #import to make requests to GitHub's OAuth
 from flask import render_template
 
+
+import pymongo
 import pprint
 import os
+import sys
 
 # This code originally from https://github.com/lepture/flask-oauthlib/blob/master/example/github.py
 # Edited by P. Conrad for SPIS 2016 to add getting Client Id and Secret from
@@ -86,6 +89,52 @@ def authorized():
 @github.tokengetter
 def get_github_oauth_token():
     return session.get('github_token')
+    
+    
+def main():
+    connection_string = os.environ["MONGO_CONNECTION_STRING"]
+    db_name = os.environ["MONGO_DBNAME"]
+    
+    client = pymongo.MongoClient(connection_string)
+    db = client[db_name]
+    collection = db['Posts'] #1. put the name of your collection in the quotes
+    
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+    except Exception as e:
+        print(e)
+    
+    #2. add a document to your collection using the insert_one method
+    
+    Posts = {"Name":"Yellow", "R":255, "G":255, "B":0}
+    a = collection.insert_one(Posts)
+    print(a)
+    #3. print the number of documents in the collection
+    x=0
+    for color in collection.find():
+        x=x+1
+    print(x)
+    #loops to see how many documents there are and prints how much it recorded.
+    
+    #4. print the first document in the collection
+    print(collection.find()[0])
+    #prints first document by the zero which gets the frist valu of a dictionary.
+    
+    #5. print all documents in the collection
+    for Posts in collection.find():
+        print(Posts)
+    #loops and prnts every document that is found in the collection through .find
+    
+    #6. print all documents with a particular value for some attribute
+    for Posts in collection.find({"R":255}):
+        print(Posts)
+    #loops to find every document in the ocllection that has the value 255 for "R" then prints those documents
+
+    #ex. print all documents with the birth date 12/1/1990
+    for Posts in collection.find({"Birthdate":"12/1/1990"}):
+        print(Posts)
 
 
 if __name__ == '__main__':
