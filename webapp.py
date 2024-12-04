@@ -36,6 +36,20 @@ github = oauth.remote_app(
     authorize_url='https://github.com/login/oauth/authorize' #URL for github's OAuth login
 )
 
+def main():
+    connection_string = os.environ["MONGO_CONNECTION_STRING"]
+    db_name = os.environ["MONGO_DBNAME"]
+    
+    client = pymongo.MongoClient(connection_string)
+    db = client[db_name]
+    collection = db['Posts'] #1. put the name of your collection in the quotes
+    
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+    except Exception as e:
+        print(e)
 
 #context processors run before templates are rendered and add variable(s) to the template's context
 #context processors must return a dictionary 
@@ -47,17 +61,18 @@ def inject_logged_in():
     
 @app.route('/')
 def home():
-
-
     return render_template('home.html')
 
 @app.route('/posted', methods=['POST'])
 def post():
-    return render_template('home.html')
+    return render_template('home.html', past_posts=forum_post())
     #This function should add the new post to the JSON file of posts and then render home.html and display the posts.  
     #Every post should include the username of the poster and text of the post. 
 
 #redirect to GitHub's OAuth page and confirm callback URL
+def forum_post():
+    return
+
 @app.route('/login')
 def login():   
     return github.authorize(callback=url_for('authorized', _external=True, _scheme='http')) #callback URL must match the pre-configured callback URL
@@ -92,52 +107,6 @@ def authorized():
 def get_github_oauth_token():
     return session.get('github_token')
     
-    
-def main():
-    connection_string = os.environ["MONGO_CONNECTION_STRING"]
-    db_name = os.environ["MONGO_DBNAME"]
-    
-    client = pymongo.MongoClient(connection_string)
-    db = client[db_name]
-    collection = db['Posts'] #1. put the name of your collection in the quotes
-    
-    # Send a ping to confirm a successful connection
-    try:
-        client.admin.command('ping')
-        print("Pinged your deployment. You successfully connected to MongoDB!")
-    except Exception as e:
-        print(e)
-    
-    #2. add a document to your collection using the insert_one method
-    
-    Posts = {"Name":"Yellow", "R":255, "G":255, "B":0}
-    a = collection.insert_one(Posts)
-    print(a)
-    #3. print the number of documents in the collection
-    x=0
-    for color in collection.find():
-        x=x+1
-    print(x)
-    #loops to see how many documents there are and prints how much it recorded.
-    
-    #4. print the first document in the collection
-    print(collection.find()[0])
-    #prints first document by the zero which gets the frist valu of a dictionary.
-    
-    #5. print all documents in the collection
-    for Posts in collection.find():
-        print(Posts)
-    #loops and prnts every document that is found in the collection through .find
-    
-    #6. print all documents with a particular value for some attribute
-    for Posts in collection.find({"R":255}):
-        print(Posts)
-    #loops to find every document in the ocllection that has the value 255 for "R" then prints those documents
-
-    #ex. print all documents with the birth date 12/1/1990
-    for Posts in collection.find({"Birthdate":"12/1/1990"}):
-        print(Posts)
-    return
 
 if __name__ == '__main__':
     app.run()
