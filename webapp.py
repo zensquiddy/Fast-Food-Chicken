@@ -91,7 +91,7 @@ def forum_post():
                 <table class="table table-hover">
                     <thead><tr><th>Username</th></tr></thead>
                     <tbody>
-                        <tr><td>{i['Posts']}</td></tr>
+                        <tr><td>{ i['Posts']}</td></tr>
                         <tr><td>
                             <form action="/delete" method="post">
                                 <button type="submit" name="delete" value="{s}">Delete</button>
