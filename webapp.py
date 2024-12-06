@@ -3,13 +3,16 @@ from flask_oauthlib.client import OAuth
 from markupsafe import Markup
 #from flask_oauthlib.contrib.apps import github #import to make requests to GitHub's OAuth
 from flask import render_template
+from bson.objectid import ObjectId
+
 
 import pymongo
 import pprint
 import os
 import sys
 
-
+#https://www.perplexity.ai/search/file-c-users-dsw-desktop-fast-CZttmv_aSG.fWt_DlZRu8Q
+#david's CONVERSATION WITH PERPLEXITY
 # This code originally from https://github.com/lepture/flask-oauthlib/blob/master/example/github.py
 # Edited by P. Conrad for SPIS 2016 to add getting Client Id and Secret from
 # environment variables, so that this will work on Heroku.
@@ -61,22 +64,40 @@ def data(text):
 def home():
     return render_template('home.html', past_posts=forum_post())
 
+@app.route('/delete', methods=['POST'])
+def delete_post():
+    id = ObjectId(request.form['delete'])
+    Posts.delete_one({'_id': id})
+    return home()
+    
 @app.route('/posted', methods=['POST'])
 def get_post():
     print(request.form['message'])
     message = [str(request.form['message'])]
     data(message)
     return home()
-    #This function should add the new post to the JSON file of posts and then render home.html and display the posts.  
-    #Every post should include the username of the poster and text of the post. 
 
-#redirect to GitHub's OAuth page and confirm callback URL
 def forum_post():
     comment = ""
-    comment += Markup("<p>anonymus:</p> <p>text</p>")
+    comment += Markup("<h2>Join the Conversation!</h2>")
 	
     for i in Posts.find():
-        comment += Markup("<p>" + i['Posts'][0] +  "</p>")
+        s = str(i['_id'])
+        comment += Markup(f'''
+            <div class="container mt-3">
+                <table class="table table-hover">
+                    <thead><tr><th>Username</th></tr></thead>
+                    <tbody>
+                        <tr><td>{i['Posts']}</td></tr>
+                        <tr><td>
+                            <form action="/delete" method="post">
+                                <button type="submit" name="delete" value="{s}">Delete</button>
+                            </form>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        ''')
        
     print(comment)
     return comment
