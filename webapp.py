@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, session, request, jsonify
 from flask_oauthlib.client import OAuth
+from markupsafe import Markup
 #from flask_oauthlib.contrib.apps import github #import to make requests to GitHub's OAuth
 from flask import render_template
 
@@ -36,20 +37,12 @@ github = oauth.remote_app(
     authorize_url='https://github.com/login/oauth/authorize' #URL for github's OAuth login
 )
 
-def main():
-    connection_string = os.environ["MONGO_CONNECTION_STRING"]
-    db_name = os.environ["MONGO_DBNAME"]
-    
-    client = pymongo.MongoClient(connection_string)
-    db = client[db_name]
-    collection = db['Posts'] #1. put the name of your collection in the quotes
-    
-    # Send a ping to confirm a successful connection
-    try:
-        client.admin.command('ping')
-        print("Pinged your deployment. You successfully connected to MongoDB!")
-    except Exception as e:
-        print(e)
+connection_string = os.environ["MONGO_CONNECTION_STRING"]
+db_name = os.environ["MONGO_DBNAME"]
+client = pymongo.MongoClient(connection_string)
+db = client[db_name]
+Posts = db['Posts']
+
 
 #context processors run before templates are rendered and add variable(s) to the template's context
 #context processors must return a dictionary 
@@ -59,20 +52,35 @@ def inject_logged_in():
     is_logged_in = 'github_token' in session #this will be true if the token is in the session and false otherwise
     return {"logged_in":is_logged_in}
     
+def data(text):
+#insert data
+    print(text)
+    db.Posts.insert_one({"Posts":text})
+    
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('home.html', past_posts=forum_post())
 
 @app.route('/posted', methods=['POST'])
-def post():
-    return render_template('home.html', past_posts=forum_post())
+def get_post():
+    print(request.form['message'])
+    message = [str(request.form['message'])]
+    data(message)
+    return home()
     #This function should add the new post to the JSON file of posts and then render home.html and display the posts.  
     #Every post should include the username of the poster and text of the post. 
 
 #redirect to GitHub's OAuth page and confirm callback URL
 def forum_post():
-    return
-
+    comment = ""
+    comment += Markup("<p>anonymus:</p> <p>text</p>")
+	
+    for i in Posts.find():
+        comment += Markup("<p>" + i['Posts'][0] +  "</p>")
+       
+    print(comment)
+    return comment
+    
 @app.route('/login')
 def login():   
     return github.authorize(callback=url_for('authorized', _external=True, _scheme='http')) #callback URL must match the pre-configured callback URL
