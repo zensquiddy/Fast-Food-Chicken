@@ -4,6 +4,8 @@ from markupsafe import Markup
 #from flask_oauthlib.contrib.apps import github #import to make requests to GitHub's OAuth
 from flask import render_template
 from bson.objectid import ObjectId
+from pymongo import MongoClient
+
 
 
 import pymongo
@@ -13,6 +15,7 @@ import sys
 
 #https://www.perplexity.ai/search/file-c-users-dsw-desktop-fast-CZttmv_aSG.fWt_DlZRu8Q
 #david's CONVERSATION WITH PERPLEXITY
+
 # This code originally from https://github.com/lepture/flask-oauthlib/blob/master/example/github.py
 # Edited by P. Conrad for SPIS 2016 to add getting Client Id and Secret from
 # environment variables, so that this will work on Heroku.
@@ -109,7 +112,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return render_template('message.html', message='You were logged out')
+    return render_template('message.html', message='You are logged out')
 
 @app.route('/login/authorized')
 def authorized():
@@ -120,7 +123,7 @@ def authorized():
     else:
         try:
             session['github_token'] = (resp['access_token'], '') #save the token to prove that the user logged in
-            session['user_data']=github.get('user').data
+            session['user_data']=github.get('use').rdata
             #pprint.pprint(vars(github['/email']))
             #pprint.pprint(vars(github['api/2/accounts/profile/']))
             message='You were successfully logged in as ' + session['user_data']['login'] + '.'
