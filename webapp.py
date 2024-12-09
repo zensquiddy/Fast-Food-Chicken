@@ -89,6 +89,9 @@ def forum_post():
             continue
         
         s = str(i['_id']) if session['user_data']['login'] == i['Posts'][0] else ""
+        button =(f''' <form action="/delete" method="post">
+                                <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
+                            </form> ''') if session['user_data']['login'] == i['Posts'][0] else ""
         
         comment += Markup(f'''
             <div class="container mt-3">
@@ -97,9 +100,7 @@ def forum_post():
                     <tbody>
                         <tr><td><p>{i['Posts'][1]}</p></td></tr>
                         <tr><td>
-                            <form action="/delete" method="post">
-                                <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
-                            </form>
+                            {button}
                         </td></tr>
                     </tbody>
                 </table>
