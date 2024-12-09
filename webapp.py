@@ -67,6 +67,14 @@ def data(text):
 def home():
     return render_template('home.html', past_posts=forum_post())
 
+
+@app.route('/reply', methods=['POST'])
+def reply_post():
+    id = ObjectId(request.form['reply'])
+    Posts.reply_one({'_id': id})
+    return home()
+
+
 @app.route('/delete', methods=['POST'])
 def delete_post():
     id = ObjectId(request.form['delete'])
@@ -92,9 +100,18 @@ def forum_post():
                     <thead><tr><th>Username</th></tr></thead>
                     <tbody>
                         <tr><td>{i['Posts']}</td></tr>
+                        <tr><td><form action='/posted' method="post">
+    <textarea name="message" style="width:100%; height:100px;"></textarea>
+    <br>
+    <input class="hidep" type="submit" name="replybox" value="Post">
+  </form>
+                        </td></tr>
                         <tr><td>
                             <form action="/delete" method="post">
                                 <button type="submit" name="delete" value="{s}">Delete</button>
+                            </form>
+                            <form action="/reply" method="post">
+                                <button type="sumbit" name="reply" value="{s}">Reply</button>
                             </form>
                         </td></tr>
                     </tbody>
