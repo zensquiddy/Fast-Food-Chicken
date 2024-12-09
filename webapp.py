@@ -7,7 +7,6 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 
 
-
 import pymongo
 import pprint
 import os
@@ -49,7 +48,6 @@ client = pymongo.MongoClient(connection_string)
 db = client[db_name]
 Posts = db['Posts']
 
-
 #context processors run before templates are rendered and add variable(s) to the template's context
 #context processors must return a dictionary 
 #this context processor adds the variable logged_in to the conext for all templates
@@ -59,9 +57,12 @@ def inject_logged_in():
     return {"logged_in":is_logged_in}
     
 def data(text):
-#insert data
+    # Insert data
     print(text)
-    db.Posts.insert_one({"Posts":text})
+    db.Posts.insert_one({
+        "Posts": [session['user_data']['login'], text[0]],
+        "Username": session['user_data']['login']
+    })
     
 @app.route('/')
 def home():
@@ -79,22 +80,25 @@ def get_post():
     message = [str(request.form['message'])]
     data(message)
     return home()
-
 def forum_post():
     comment = ""
     comment += Markup("<h2>Join the Conversation!</h2>")
 	
     for i in Posts.find():
-        s = str(i['_id'])
+        if 'Posts' not in i or not isinstance(i['Posts'], list) or len(i['Posts']) < 2:
+            continue
+        
+        s = str(i['_id']) if session['user_data']['login'] == i['Posts'][0] else ""
+        
         comment += Markup(f'''
             <div class="container mt-3">
                 <table class="table table-hover">
-                    <thead><tr><th>Username</th></tr></thead>
+                    <thead><tr><th><p>{i['Posts'][0]}</p></th></tr></thead>
                     <tbody>
-                        <tr><td>{ i['Posts']}</td></tr>
+                        <tr><td><p>{i['Posts'][1]}</p></td></tr>
                         <tr><td>
                             <form action="/delete" method="post">
-                                <button type="submit" name="delete" value="{s}">Delete</button>
+                                <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
                             </form>
                         </td></tr>
                     </tbody>
@@ -104,6 +108,7 @@ def forum_post():
        
     print(comment)
     return comment
+
     
 @app.route('/login')
 def login():   
