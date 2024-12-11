@@ -14,6 +14,9 @@ import sys
 
 #https://www.perplexity.ai/search/file-c-users-dsw-desktop-fast-CZttmv_aSG.fWt_DlZRu8Q
 #david's CONVERSATION WITH PERPLEXITY
+#more:
+#https://www.perplexity.ai/search/file-c-users-dsw-desktop-fast-FyYqicCVTxmaC4PZwYQaDA
+
 
 # This code originally from https://github.com/lepture/flask-oauthlib/blob/master/example/github.py
 # Edited by P. Conrad for SPIS 2016 to add getting Client Id and Secret from
@@ -57,16 +60,23 @@ def inject_logged_in():
     return {"logged_in":is_logged_in}
     
 def data(text):
-    # Insert data
-    print(text)
-    db.Posts.insert_one({
-        "Posts": [session['user_data']['login'], text[0]],
-        "Username": session['user_data']['login']
-    })
+    if 'user_data' in session and 'login' in session['user_data']:
+        # Insert data
+        print(text)
+        db.Posts.insert_one({
+            "Posts": [session['user_data']['login'], text[0]],
+            "Username": session['user_data']['login']
+        })
+    else:
+        print("User not logged in, cannot post message")
+
     
 @app.route('/')
 def home():
-    return render_template('home.html', past_posts=forum_post())
+    if 'user_data' in session and 'login' in session['user_data']:
+        return render_template('home.html', past_posts=forum_post())
+    else:
+        return render_template('home.html', past_posts="")
 
 @app.route('/delete', methods=['POST'])
 def delete_post():
@@ -76,10 +86,14 @@ def delete_post():
     
 @app.route('/posted', methods=['POST'])
 def get_post():
+    if 'user_data' not in session or 'login' not in session['user_data']:
+        return render_template('message.html', message='You must be logged in to post a message.')
+    
     print(request.form['message'])
     message = [str(request.form['message'])]
     data(message)
     return home()
+
 def forum_post():
     comment = ""
     comment += Markup("<h2>Join the Conversation!</h2>")
@@ -88,10 +102,15 @@ def forum_post():
         if 'Posts' not in i or not isinstance(i['Posts'], list) or len(i['Posts']) < 2:
             continue
         
-        s = str(i['_id']) if session['user_data']['login'] == i['Posts'][0] else ""
-        button =(f''' <form action="/delete" method="post">
-                                <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
-                            </form> ''') if session['user_data']['login'] == i['Posts'][0] else ""
+        # Check if user is logged in before accessing session['user_data']
+        if 'user_data' in session and 'login' in session['user_data']:
+            s = str(i['_id']) if session['user_data']['login'] == i['Posts'][0] else ""
+            button = (f''' <form action="/delete" method="post">
+                                    <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
+                                </form> ''') if session['user_data']['login'] == i['Posts'][0] else ""
+        else:
+            s = ""
+            button = ""
         
         comment += Markup(f'''
             <div class="container mt-3">
@@ -109,6 +128,7 @@ def forum_post():
        
     print(comment)
     return comment
+
 
     
 @app.route('/login')
