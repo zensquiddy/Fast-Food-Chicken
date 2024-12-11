@@ -115,14 +115,12 @@ def forum_post():
                         </td></tr>
                         <tr><td><p>{i['Posts'][1]}</p></td></tr>
                         <tr><td>
-<<<<<<< HEAD
+
                             <form action="/delete" method="post">
                                 <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
                             </form>
-                            <button id="reply" class="reply" value="{s}">Reply</button>
-=======
-                            {button}
->>>>>>> 868edd51f6673b404010126a34853d9b43bd8738
+                            <button id="reply" class="reply" value="{s}">Reply</button>                            {button}
+
                         </td></tr>
                     </tbody>
                 </table>
@@ -170,3 +168,4 @@ def get_github_oauth_token():
 
 if __name__ == '__main__':
     app.run()
+
