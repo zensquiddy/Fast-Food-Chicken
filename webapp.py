@@ -78,6 +78,14 @@ def home():
     else:
         return render_template('home.html', past_posts="")
 
+
+@app.route('/reply', methods=['POST'])
+def reply_post():
+    id = ObjectId(request.form['reply'])
+    Posts.reply_one({'_id': id})
+    return home()
+
+
 @app.route('/delete', methods=['POST'])
 def delete_post():
     id = ObjectId(request.form['delete'])
@@ -117,9 +125,23 @@ def forum_post():
                 <table class="table table-hover">
                     <thead><tr><th><p>{i['Posts'][0]}</p></th></tr></thead>
                     <tbody>
+                        <tr><td>{i['Posts']}</td></tr>
+                        <tr><td><form id="replybox" class="hidep" action='/posted' method="post">
+    <textarea name="message" style="width:100%; height:100px;"></textarea>
+    <br>
+    <input class="replybox" id="hidep" type="submit" name="replybox" value="Post">
+  </form>
+                        </td></tr>
                         <tr><td><p>{i['Posts'][1]}</p></td></tr>
                         <tr><td>
+<<<<<<< HEAD
+                            <form action="/delete" method="post">
+                                <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
+                            </form>
+                            <button id="reply" class="reply" value="{s}">Reply</button>
+=======
                             {button}
+>>>>>>> 868edd51f6673b404010126a34853d9b43bd8738
                         </td></tr>
                     </tbody>
                 </table>
