@@ -110,41 +110,40 @@ def forum_post():
         if 'Posts' not in i or not isinstance(i['Posts'], list) or len(i['Posts']) < 2:
             continue
         
+        post_id = str(i['_id'])
+        
         # Check if user is logged in before accessing session['user_data']
         if 'user_data' in session and 'login' in session['user_data']:
-            s = str(i['_id']) if session['user_data']['login'] == i['Posts'][0] else ""
-            button = (f''' <form action="/delete" method="post">
-                                    <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
-                                </form> ''') if session['user_data']['login'] == i['Posts'][0] else ""
+            s = post_id if session['user_data']['login'] == i['Posts'][0] else ""
+            button = (f''' <tr><td><form action="/delete" method="post">
+                                    <button type="submit" name="delete" value="{s}">Delete</button>
+                                </form></td></tr> ''') if session['user_data']['login'] == i['Posts'][0] else ""
         else:
             s = ""
             button = ""
         
         comment += Markup(f'''
-            <div class="container mt-3">
-                <table class="table table-hover">
-                    <thead><tr><th><p>{i['Posts'][0]}</p></th></tr></thead>
-                    <tbody>
-                        <tr><td>{i['Posts']}</td></tr>
-                        <tr><td><form id="replybox" class="hidep" action='/posted' method="post">
-    <textarea name="message" style="width:100%; height:100px;"></textarea>
-    <br>
-    <input class="replybox" id="hidep" type="submit" name="replybox" value="Post">
-  </form>
-                        </td></tr>
-                        <tr><td><p>{i['Posts'][1]}</p></td></tr>
-                        <tr><td>
-
-                            <form action="/delete" method="post">
-                                <button type="submit" name="delete" value="{s}"><p>Delete</p></button>
-                            </form>
-                            <button id="reply" class="reply" value="{s}">Reply</button>                            {button}
-
-                        </td></tr>
-                    </tbody>
-                </table>
-            </div>
-        ''')
+          
+        <div class="container mt-3">
+            <table class="table table-hover">
+                <thead><tr><th><p>{i['Posts'][0]}</p></th></tr></thead>
+                <tbody>
+                    <tr><td><p>{i['Posts'][1]}</p></td></tr>       
+                    {button}
+                    <tr><td>
+                    <div class="reply-container">
+                        <button class="reply-button" data-post-id="{post_id}">Reply</button>
+                        <form class="replybox" id="replybox-{post_id}" action='/posted' method="post" style="display: none;">
+                            <textarea name="message" style="width:100%; height:100px;"></textarea>
+                            <br>
+                            <input type="submit" name="replybox" value="Post">
+                        </form>
+                    </div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    ''')
        
     print(comment)
     return comment

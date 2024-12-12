@@ -17,4 +17,9 @@ body {
      margin-left: 20px;
 }
 
-
+.hidep{
+	display: none;
+}
+.replybox {
+    display: none;
+}
